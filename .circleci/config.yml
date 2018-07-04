@@ -14,7 +14,7 @@ job-definition: &jobdef
                     export SFDX_AUTOUPDATE_DISABLE=true
                     export SFDX_USE_GENERIC_UNIX_KEYCHAIN=true
                     export SFDX_DOMAIN_RETRY=300
-                    npm install sfdx-cli@6.22.1-022a4908f1
+                    npm install sfdx-cli
                     node_modules/sfdx-cli/bin/run --version
                     node_modules/sfdx-cli/bin/run plugins --core
                 fi
@@ -32,7 +32,7 @@ job-definition: &jobdef
             name: Remove Server Key
             when: always	
             command: |
-                rm assets/server.key
+                rm server.key
         - run:
             name: Install Lightning Testing Service
             command: |
