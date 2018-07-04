@@ -1,19 +1,29 @@
-general:
+job-definition: &jobdef
+    docker:
+	- image: circleci/openjdk:latest-node-browsers
+    steps:
+	- checkout
 
-   branches:
-    only:
-       - dev # specific branch
-       - /dev-.*/ # or regexes
+- restore_cache:
+	    keys:
+	        - sfdx-6.8.2-local
+	- run:
+	    name: Install Salesforce DX
+	    command: |
+	        openssl aes-256-cbc -k $KEY -in assets/server.key.enc -out assets/server.key -d -md md5
+	        if [ ! -d node_modules/sfdx-cli ]; then
+	            export SFDX_AUTOUPDATE_DISABLE=true
+	            export SFDX_USE_GENERIC_UNIX_KEYCHAIN=true
+	            export SFDX_DOMAIN_RETRY=300
+	            npm install sfdx-cli@6.22.1-022a4908f1
+	            node_modules/sfdx-cli/bin/run --version
+	            node_modules/sfdx-cli/bin/run plugins --core
+	        fi
+	- save_cache:
+	    key: sfdx-6.8.2-local
+	    paths: 
+	        - node_modules
 
-machine:
-  timezone: America/New_York
-  environment:
-    # from https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli_standalone.htm
-    # and https://developer.salesforce.com/media/salesforce-cli/manifest.json
-    DX_CLI_URL: https://developer.salesforce.com/media/salesforce-cli/sfdx-v5.7.6-d42cf65-linux-amd64.tar.xz
-    SFDX_DISABLE_ENCRYPTION: true
-
-dependencies:
   override:
     - wget -qO- $DX_CLI_URL | tar xJf -
     - ./sfdx/install
@@ -45,3 +55,10 @@ deployment:
     - sfdx force:source:convert -r force-app -d testDeploy
     - . cleanupDeploy.sh
     - sfdx force:mdapi:deploy -d testDeploy/ -u deploy -w 2
+
+ version: 2
+  test_and_static:
+    jobs:
+      - build-enterprise
+
+      - static-analysis
