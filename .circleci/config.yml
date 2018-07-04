@@ -25,14 +25,14 @@ job-definition: &jobdef
         - run: 
             name: Create Scratch Org
             command: |
-                node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid $HUB_CONSUMER_KEY --jwtkeyfile /server.key --username $HUB_SFDC_USER --setdefaultdevhubusername -a DevhubOrg
+                node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid $HUB_CONSUMER_KEY --jwtkeyfile assets/server.key --username $HUB_SFDC_USER --setdefaultdevhubusername -a DevhubOrg
                 echo "Creating scratch org with definition $SCRATCH_DEF"
                 node_modules/sfdx-cli/bin/run force:org:create -v DevhubOrg -s -f "config/$SCRATCH_DEF" -a scratch
         - run:
             name: Remove Server Key
             when: always	
             command: |
-                rm /server.key
+                rm assets/server.key
         - run:
             name: Install Lightning Testing Service
             command: |
